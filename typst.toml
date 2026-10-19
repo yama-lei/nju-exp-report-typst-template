@@ -1,33 +1,21 @@
-# for a description of available keys, see https://github.com/typst/packages/?tab=readme-ov-file#package-format
-
 [package]
-name = ""
+name = "nju-exp-report"
 version = "0.1.0"
 entrypoint = "src/lib.typ"
-authors = []
-license = "Unlicense"
-description = ""
-homepage = ""
-repository = ""
-keywords = []
-categories = []
-disciplines = []
-# compiler = ""
+authors = ["yama-lei <@yama-lei>"]
+license = "MIT"
+description = "NJU-style course experiment reports in Chinese."
+repository = "https://github.com/yama-lei/nju-exp-report-typst-template"
+keywords = ["NJU", "Nanjing University", "南京大学", "实验报告", "lab report"]
+categories = ["report"]
+compiler = "0.14.2"
 exclude = [
-  ".github",
-  "docs",
-  "scripts",
-  "tests",
-  ".typstignore",
-  "Justfile",
-  "thumbnail-dark.svg",
-  "thumbnail-light.svg",
+  ".github", ".gitignore", ".typstignore", "Justfile", "CHANGELOG.md",
+  "docs", "scripts", "tests", "build", "dist", "out",
+  "thumbnail.png",
 ]
 
-# [template]
-# path = "template"
-# entrypoint = "main.typ"
-# thumbnail = "thumbnail.png"
-
-# [tool.mytool]
-# foo = "bar"
+[template]
+path = "template"
+entrypoint = "main.typ"
+thumbnail = "thumbnail.png"

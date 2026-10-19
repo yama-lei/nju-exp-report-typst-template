@@ -1,44 +1,28 @@
 root := justfile_directory()
-
 export TYPST_ROOT := root
 
 [private]
 default:
   @just --list --unsorted
 
-# generate manual
+# Compile the manual and render the initialized template's first page.
 doc:
-  typst compile docs/manual.typ docs/manual.pdf
-  typst compile docs/thumbnail.typ thumbnail-light.svg
-  typst compile --input theme=dark docs/thumbnail.typ thumbnail-dark.svg
+  mkdir -p build
+  typst compile --root . docs/manual.typ build/manual.pdf
+  ./scripts/package build/packages/local
+  typst compile --root . --package-path build/packages --pages 1 --ppi 150 template/main.typ thumbnail.png
 
-# run test suite
-test *args:
-  tt run --no-fail-fast {{ args }}
+# Compile source imports, package imports, and an initialized project in isolation.
+test:
+  python3 -m unittest discover -s tests -v
 
-# update test cases
-update *args:
-  tt update {{ args }}
-
-# package the library into the specified destination folder
+# Package into TARGET/nju-exp-report/0.1.0.
 package target:
   ./scripts/package "{{target}}"
 
-# install the library with the "@local" prefix
 install: (package "@local")
 
-# install the library with the "@preview" prefix (for pre-release testing)
-install-preview: (package "@preview")
+uninstall:
+  ./scripts/uninstall @local
 
-[private]
-remove target:
-  ./scripts/uninstall "{{target}}"
-
-# uninstalls the library from the "@local" prefix
-uninstall: (remove "@local")
-
-# uninstalls the library from the "@preview" prefix (for pre-release testing)
-uninstall-preview: (remove "@preview")
-
-# run ci suite
 ci: test doc

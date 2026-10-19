@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eu
+set -euo pipefail
 
 # adapted from https://github.com/johannes-wolf/cetz/blob/35c0868378cea5ad323cc0d9c2f76de8ed9ba5bd/scripts/package
 # licensed under Apache License 2.0
@@ -14,13 +14,17 @@ if (( $# < 1 )) || [[ "${1:-}" == "help" ]]; then
   echo "directory will be used so that the package gets installed for local use."
   echo "The name and version are read from 'typst.toml' in the project root."
   echo ""
-  echo "Local package prefix: $DATA_DIR/typst/package/local"
-  echo "Local preview package prefix: $DATA_DIR/typst/package/preview"
+  echo "Local package prefix: $DATA_DIR/typst/packages/local"
+  echo "Local preview package prefix: $DATA_DIR/typst/packages/preview"
   exit 1
 fi
 
 TARGET="$(resolve-target "${1:?Missing target path, @local or @preview}")"
+# Resolve relative targets before switching to the repository root.
+mkdir -p "$TARGET"
+TARGET="$(cd "$TARGET"; pwd -P)"
 echo "Install dir: $TARGET"
+cd "$ROOT"
 
 # ignore rules
 readarray -t ignores < <(grep -v '^#' .typstignore | grep '[^[:blank:]]')
@@ -40,6 +44,10 @@ function enumerate {
 
     local f
     for f in "${files[@]}"; do
+      # Do not bundle the destination when packaging into this repository.
+      if [[ "$ROOT/${f#./}" == "$TARGET" ]]; then
+        continue
+      fi
       local include
       include=1
 
@@ -68,6 +76,7 @@ readarray -t files < <(enumerate ".")
 # declare -p files >&2
 
 TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
 
 for f in "${files[@]}"; do
   mkdir -p "$TMP/$(dirname "$f")" 2>/dev/null
